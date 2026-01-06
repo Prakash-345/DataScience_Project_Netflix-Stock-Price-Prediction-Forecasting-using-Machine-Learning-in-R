@@ -46,3 +46,51 @@ mape_rf <- mape(results$Actual, results$RandomForest)
 mae_ar  <- mean(abs(results$Actual - results$ARIMA))
 rmse_ar <- RMSE(results$ARIMA, results$Actual)
 mape_ar <- mape(results$Actual, results$ARIMA)
+
+# ---------------- Step 5: Create Comparison Table ----------------
+evaluation_metrics <- data.frame(
+  Model = c("Linear Regression", "Random Forest", "ARIMA"),
+  MAE   = c(mae_lm, mae_rf, mae_ar),
+  RMSE  = c(rmse_lm, rmse_rf, rmse_ar),
+  MAPE  = c(mape_lm, mape_rf, mape_ar)
+)
+
+evaluation_metrics
+
+# ---------------- Step 6: Save Evaluation Results ----------------
+write.csv(
+  evaluation_metrics,
+  "./data/Model_Evaluation_Results.csv",
+  row.names = FALSE
+)
+
+# Also save a copy for report tables
+dir.create("./outputs/tables", recursive = TRUE, showWarnings = FALSE)
+
+write.csv(
+  evaluation_metrics,
+  "./outputs/tables/Model_Performance_Comparison.csv",
+  row.names = FALSE
+)
+
+# ---------------- Step 7: Visual Comparison of Errors ----------------
+ggplot(evaluation_metrics, aes(x = Model, y = RMSE, fill = Model)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "RMSE Comparison Across Models",
+    x = "Model",
+    y = "RMSE"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# ---------------- Step 8: Key Insights ----------------
+# Interpretation:
+# - Lower error values indicate better predictive performance
+# - Random Forest typically performs best due to non-linear learning
+# - Linear Regression serves as a baseline model
+# - ARIMA captures temporal trends but struggles with complex patterns
+
+############################################################
+# End of Model Evaluation & Insights Script
+############################################################

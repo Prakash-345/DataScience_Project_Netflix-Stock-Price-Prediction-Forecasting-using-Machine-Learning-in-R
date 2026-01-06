@@ -1,0 +1,6 @@
+# R session history
+.Rhistory
+
+# R environment files (optional but recommended)
+.RData
+.Ruserdata

@@ -58,3 +58,63 @@ summary(netflix_clean)
 
 # ---------------- Step 7: Export Cleaned Dataset ----------------
 write.csv(netflix_clean, "./data/NFLX_cleaned.csv", row.names = FALSE)
+
+
+# ---------------- Step 8: Load Cleaned Dataset ----------------
+netflix <- read.csv("./data/NFLX_cleaned.csv")
+
+# Validate dataset integrity
+str(netflix)
+summary(netflix)
+
+# ---------------- Step 9: Chronological Ordering ----------------
+# Stock data must be sorted chronologically
+
+netflix$Date <- as.Date(netflix$Date)
+
+# Verify ordering before sorting
+head(netflix$Date)
+tail(netflix$Date)
+
+# Sort dataset by Date
+netflix <- netflix[order(netflix$Date), ]
+
+# Verify ordering after sorting
+head(netflix$Date)
+tail(netflix$Date)
+
+
+# ---------------- Step 10: Time-Series Conversion ----------------
+# xts is used as it is optimized for financial time-series data
+
+library(xts)
+
+netflix_xts <- xts(
+  netflix[, c("Open", "High", "Low", "Close", "Adj.Close", "Volume")],
+  order.by = netflix$Date
+)
+
+head(netflix_xts)
+tail(netflix_xts)
+
+# ---------------- Step 11: Structural Feature Integration ----------------
+# Moving averages are added to capture short- and long-term trends
+
+library(TTR)
+
+netflix_xts$MA_20 <- SMA(netflix_xts$Close, n = 20)
+netflix_xts$MA_50 <- SMA(netflix_xts$Close, n = 50)
+netflix_xts
+
+# ---------------- Step 12: Convert Time-Series to Data Frame ----------------
+# Required for EDA, feature engineering, and ML models
+
+netflix_structured <- data.frame(
+  Date = index(netflix_xts),
+  coredata(netflix_xts)
+)
+netflix_structured
+
+# ---------------- Step 13: Save Structured Outputs ----------------
+saveRDS(netflix_xts, "./data/NFLX_timeseries.rds")
+write.csv(netflix_structured, "./data/NFLX_structured.csv", row.names = FALSE)
